@@ -24,10 +24,10 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-              Tu n'es pas seul.
+              Tu nes pas seul.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-               Un espace d'information, de témoignages et d'entraide
+               Un espace dinformation, de témoignages et dentraide
               pour les personnes confrontées aux addictions et leurs
               proches.
             </p>
@@ -66,7 +66,7 @@ export default function HomePage() {
 
             <p className="mt-4 text-gray-600">
                 Chacun possède son propre parcours. Ici, nous voulons
-              privilégier l'écoute, le respect et l'entraide.
+              privilégier lécoute, le respect et lentraide.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function HomePage() {
                 </h3>
 
                 <p className="mt-3 text-sm leading-6 text-gray-600">
-                  Pouvoir parler de son parcours sans avoir peur d'être jugé.
+                  Pouvoir parler de son parcours sans avoir peur dêtre jugé.
                 </p>
             </article>
 
@@ -93,7 +93,7 @@ export default function HomePage() {
                 </h3>
 
                 <p className="mt-3 text-sm leading-6 text-gray-600">
-                  Partager son expérience et découvrir celle d'autres personnes.
+                  Partager son expérience et découvrir celle dautres personnes.
                 </p>
             </article>
 

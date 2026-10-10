@@ -1,3 +1,4 @@
+"use client"
 export default function Footer(){
     return (
         <footer className="border-t bg-white">
@@ -10,13 +11,14 @@ export default function Footer(){
 
                     {/* Informations complémentaires */}
                     <p className="text-sm text-gray-500">
-                        Un espace d'échange sans jugement.
+                        Un espace déchange sans jugement.
                     </p>
                 </div>
                 {/* Copyright  */}
-                <p className="mt-6 text-xs text-gray-400">
-                    @ { new Date().getFullYear()} Entraide
-                </p>
+             
+              <p className="mt-6 text-xs text-gray-400">
+              @ { new Date().getFullYear()} Entraide
+              </p>  
             </div>
         </footer>
     )

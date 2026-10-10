@@ -6,7 +6,7 @@ export default function RessourcesPage() {
             </h1>
 
             <p className="mt-4 text-gray-600">
-                Des ressources et informations pour trouver de l'aide.
+                Des ressources et informations pour trouver de laide.
             </p>
         </section>
     );

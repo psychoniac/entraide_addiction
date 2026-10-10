@@ -8,7 +8,7 @@ export default function AboutPage() {
 
       <p className="mt-4 max-w-2xl text-gray-600">
         Ce projet a pour objectif de créer progressivement
-        un espace d'information, d'expression et d'entraide.
+        un espace dinformation, dexpression et dentraide.
       </p>
 
     </section>
