@@ -1,6 +1,7 @@
 
 import PostCard from "@/components/blog/PostCard";
 import { getPublishedPostsHybrid } from "@/lib/posts-hybrid";
+import { connection } from "next/server";
 
 export const instant = false;
 /**
@@ -10,6 +11,7 @@ export const instant = false;
  * nous pouvons attendre les données directement côté serveur.
  */
 export default async function BlogPage() {
+  await connection();
   // Récupération des articles publiés.
   const posts = await getPublishedPostsHybrid();
 

@@ -3,7 +3,11 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createPostDraft } from "@/app/mes-articles/nouveau/actions";
+import {
+  createPostDraft,
+  updatePostDraft,
+} from "@/app/mes-articles/nouveau/actions";
+import PostPreview from "@/components/blog/PostPreview";
 
 const categories = [
   "Reconstruction",
@@ -14,9 +18,20 @@ const categories = [
   "Autre",
 ];
 
-/**
- * Transforme un titre en slug utilisable dans une URL.
- */
+export type EditablePost = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  excerpt: string;
+  content: string[];
+  coverImage: string | null;
+};
+
+type PostEditorFormProps = {
+  initialPost?: EditablePost;
+};
+
 function createSlug(value: string): string {
   return value
     .normalize("NFD")
@@ -27,16 +42,26 @@ function createSlug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export default function PostEditorForm() {
+export default function PostEditorForm({
+  initialPost,
+}: PostEditorFormProps) {
   const router = useRouter();
+  const isEditing = Boolean(initialPost);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugEdited, setSlugEdited] = useState(false);
-  const [category, setCategory] = useState("Reconstruction");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [title, setTitle] = useState(initialPost?.title ?? "");
+  const [slug, setSlug] = useState(initialPost?.slug ?? "");
+  const [slugEdited, setSlugEdited] = useState(Boolean(initialPost));
+  const [category, setCategory] = useState(
+    initialPost?.category ?? "Reconstruction"
+  );
+  const [excerpt, setExcerpt] = useState(initialPost?.excerpt ?? "");
+  const [content, setContent] = useState(
+    initialPost?.content.join("\n\n") ?? ""
+  );
+  const [coverImage, setCoverImage] = useState(
+    initialPost?.coverImage ?? ""
+  );
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -59,12 +84,7 @@ export default function PostEditorForm() {
     setMessage("");
     setIsError(false);
 
-    if (
-      !title.trim() ||
-      !slug.trim() ||
-      !excerpt.trim() ||
-      !content.trim()
-    ) {
+    if (!title.trim() || !slug.trim() || !excerpt.trim() || !content.trim()) {
       setMessage("Merci de remplir tous les champs obligatoires.");
       setIsError(true);
       return;
@@ -103,29 +123,36 @@ export default function PostEditorForm() {
     setIsSaving(true);
 
     try {
-      const result = await createPostDraft({
+      const input = {
         title,
         slug,
         category,
         excerpt,
         content,
         coverImage,
-      });
+      };
+
+      const result = initialPost
+        ? await updatePostDraft(initialPost.id, input)
+        : await createPostDraft(input);
 
       setMessage(result.message);
       setIsError(!result.success);
 
       if (result.success) {
-        // Le formulaire sera réinitialisé après confirmation.
-        setTitle("");
-        setSlug("");
-        setSlugEdited(false);
-        setCategory("Reconstruction");
-        setExcerpt("");
-        setContent("");
-        setCoverImage("");
-
-        router.refresh();
+        if (isEditing) {
+          router.push("/mes-articles");
+          router.refresh();
+        } else {
+          setTitle("");
+          setSlug("");
+          setSlugEdited(false);
+          setCategory("Reconstruction");
+          setExcerpt("");
+          setContent("");
+          setCoverImage("");
+          router.refresh();
+        }
       }
     } catch {
       setMessage(
@@ -138,19 +165,64 @@ export default function PostEditorForm() {
   }
 
   function handleReset() {
-    setTitle("");
-    setSlug("");
-    setSlugEdited(false);
-    setCategory("Reconstruction");
-    setExcerpt("");
-    setContent("");
-    setCoverImage("");
+    if (initialPost) {
+      setTitle(initialPost.title);
+      setSlug(initialPost.slug);
+      setSlugEdited(true);
+      setCategory(initialPost.category);
+      setExcerpt(initialPost.excerpt);
+      setContent(initialPost.content.join("\n\n"));
+      setCoverImage(initialPost.coverImage ?? "");
+    } else {
+      setTitle("");
+      setSlug("");
+      setSlugEdited(false);
+      setCategory("Reconstruction");
+      setExcerpt("");
+      setContent("");
+      setCoverImage("");
+    }
+
     setMessage("");
     setIsError(false);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+     <div className="space-y-6">
+    {isPreviewing ? (
+      <>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold">
+              Prévisualisation de larticle
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Aperçu non publié, basé sur tes modifications actuelles.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsPreviewing(false)}
+            className="rounded-lg border border-gray-300 px-4 py-2 font-semibold hover:bg-gray-50"
+          >
+            Retour à lédition
+          </button>
+        </div>
+
+        <PostPreview
+          title={title}
+          slug={slug}
+          category={category}
+          excerpt={excerpt}
+          content={content}
+          coverImage={coverImage}
+          readingTime={readingTime}
+        />
+      </>
+    ) : (
+
+      <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label htmlFor="title" className="mb-2 block text-sm font-semibold">
           Titre de larticle *
@@ -165,12 +237,12 @@ export default function PostEditorForm() {
           onChange={(event) => handleTitleChange(event.target.value)}
           placeholder="Ex. : Recommencer à son rythme"
           className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-        />
+          />
       </div>
 
       <div>
         <label htmlFor="slug" className="mb-2 block text-sm font-semibold">
-          Slug de l’article *
+          Slug de larticle *
         </label>
         <input
           id="slug"
@@ -212,6 +284,9 @@ export default function PostEditorForm() {
               {item}
             </option>
           ))}
+          {!categories.includes(category) && (
+            <option value={category}>{category}</option>
+          )}
         </select>
       </div>
 
@@ -299,13 +374,30 @@ export default function PostEditorForm() {
         </div>
       )}
 
+      <div>
+        <button
+          type="button"
+          onClick={() => {
+            setMessage("");
+            setIsPreviewing(true);
+          }}
+          className="rounded-lg border border-emerald-800 px-5 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-50"
+        >
+          Prévisualiser larticle
+        </button>
+      </div>
+
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
           disabled={isSaving}
           className="rounded-lg bg-emerald-800 px-5 py-3 font-semibold text-white transition hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSaving ? "Enregistrement..." : "Enregistrer le brouillon"}
+          >
+          {isSaving
+            ? "Enregistrement..."
+            : isEditing
+              ? "Enregistrer les modifications"
+              : "Enregistrer le brouillon"}
         </button>
 
         <button
@@ -314,13 +406,16 @@ export default function PostEditorForm() {
           disabled={isSaving}
           className="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
         >
-          Réinitialiser
+          {isEditing ? "Annuler les changements" : "Réinitialiser"}
         </button>
       </div>
 
       <p className="text-sm text-gray-500">
-        * Champs obligatoires. Lenregistrement crée un brouillon non publié.
+        * Champs obligatoires. Les modifications enregistrées ne publient pas
+        automatiquement larticle.
       </p>
     </form>
+    )}
+    </div>
   );
 }
