@@ -17,7 +17,7 @@ export default function Footer(){
                 {/* Copyright  */}
              
               <p className="mt-6 text-xs text-gray-400">
-              @ { new Date().getFullYear()} Entraide
+              © 2026 Entraide
               </p>  
             </div>
         </footer>

@@ -4,8 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, Clock3 } from "lucide-react";
 import { notFound } from "next/navigation";
 
-import { getPostBySlug } from "@/lib/posts";
+import { getPostBySlugHybrid } from "@/lib/posts-hybrid";
 
+export const instant = false;
 /**
  * Type des paramètres de cette route dynamique.
  *
@@ -29,7 +30,7 @@ export async function generateMetadata({
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlugHybrid(slug);
 
   // Métadonnées de secours si l'article n'existe pas.
   if (!post) {
@@ -52,7 +53,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
 
   // 2. Chercher l'article correspondant.
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlugHybrid(slug);
 
   // 3. Afficher une vraie page 404 si l'article est absent.
   if (!post) {

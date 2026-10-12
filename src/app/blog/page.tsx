@@ -1,7 +1,8 @@
 
 import PostCard from "@/components/blog/PostCard";
-import { getPublishedPosts } from "@/lib/posts";
+import { getPublishedPostsHybrid } from "@/lib/posts-hybrid";
 
+export const instant = false;
 /**
  * Page publique affichant la liste des articles.
  *
@@ -10,7 +11,7 @@ import { getPublishedPosts } from "@/lib/posts";
  */
 export default async function BlogPage() {
   // Récupération des articles publiés.
-  const posts = await getPublishedPosts();
+  const posts = await getPublishedPostsHybrid();
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-16">
